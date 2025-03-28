@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 import feedparser
 import json
 import requests
@@ -8,7 +10,7 @@ from datetime import datetime, timezone, timedelta
 
 WEBHOOK_URL = "dummy"
 FEED_URL = "https://www.apple.com/jp/newsroom/rss-feed.rss"
-DELTA_MINUTES = 30
+DELTA_MINUTES = 10
 
 
 def notify_discord(entry):
@@ -29,7 +31,8 @@ def notify_discord(entry):
         "description": description,
         "color": 16777215,
         "image": {"url": image_url} if image_url else {},
-        "footer": {"text": "Apple Newsroom Japan"}
+        "footer": {"text": "Apple Newsroom Japan - Powered by Masato Hanayama"},
+        "timestamp": datetime.now(timezone.utc).isoformat(),
     }
 
     payload = {
