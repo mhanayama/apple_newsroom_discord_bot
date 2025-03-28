@@ -3,6 +3,7 @@ import json
 import requests
 import os
 import time
+import logging
 from datetime import datetime, timezone, timedelta
 
 WEBHOOK_URL = "dummy"
@@ -20,6 +21,8 @@ def notify_discord(entry):
             image_url = link["href"]
             break
 
+    logging.info(f"Sending title: {title}")
+
     embed = {
         "title": title,
         "url": url,
@@ -29,18 +32,22 @@ def notify_discord(entry):
         "footer": {"text": "Apple Newsroom Japan"}
     }
 
-    # print(embed)
-    # print()
-
     payload = {
-        "content": "🆕 Apple Newsroomに新しい記事が投稿されました！",
+        "content": "🍎 Apple Newsroomに新しい記事が投稿されました！",
         "embeds": [embed]
     }
-
-    requests.post(WEBHOOK_URL, json=payload)
+    try:
+        res = requests.post(WEBHOOK_URL, json=payload)
+    except Exception as e:
+        logging.error(f"Error sending notification: {e}")
+    finally:
+        logging.info(f"Status Code: {res.status_code}")
+        time.sleep(2)
 
 
 def main():
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+    logging.info("Starting Apple Newsroom Notifier...")
     feed = feedparser.parse(FEED_URL)
     now = datetime.now(timezone.utc)
     for entry in feed.entries:
@@ -48,6 +55,8 @@ def main():
         delta = now - updated_dt
         if delta <= timedelta(minutes=DELTA_MINUTES):
             notify_discord(entry)
+        # break
+    logging.info("All done!")
 
 
 if __name__ == "__main__":
